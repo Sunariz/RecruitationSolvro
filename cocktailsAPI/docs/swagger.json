@@ -1,0 +1,846 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Cocktail Api",
+    "version": "1.0.0",
+    "description": "Recruitment task for KN Solvro made by Alicja Bonar"
+  },
+  "components": {
+    "responses": {
+      "Forbidden": {
+        "description": "Access token is missing or invalid"
+      },
+      "Accepted": {
+        "description": "The request was accepted"
+      },
+      "Created": {
+        "description": "The resource has been created"
+      },
+      "NotFound": {
+        "description": "The resource has been created"
+      },
+      "NotAcceptable": {
+        "description": "The resource has been created"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "BasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "Any": {
+        "description": "Any JSON object not defined as schema"
+      },
+      "Cocktail": {
+        "type": "object",
+        "required": ["name", "category", "instructions"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the cocktail",
+            "example": "Margarita"
+          },
+          "category": {
+            "type": "string",
+            "description": "The category of the cocktail (e.g., Cocktail, Mocktail, etc.)",
+            "example": "Cocktail"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Instructions on how to prepare the cocktail",
+            "example": "Mix ingredients and serve with a salted rim."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was created",
+            "example": "2025-03-19T12:34:56Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was last updated",
+            "example": "2025-03-19T12:34:56Z"
+          }
+        },
+        "description": "cocktail (Model)"
+      },
+      "CocktailIngredient": {
+        "type": "object",
+        "required": ["cocktailId", "ingredientId", "quantity"],
+        "properties": {
+          "cocktailId": {
+            "type": "string",
+            "description": "The unique ID of the cocktail",
+            "example": "60b7c7e3f4e8fa1b3c7a5391"
+          },
+          "ingredientId": {
+            "type": "string",
+            "description": "The unique ID of the ingredient",
+            "example": "60b7c7e3f4e8fa1b3c7a5392"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The quantity of the ingredient in the cocktail (e.g., \"2 oz\")",
+            "example": "2 oz"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was created",
+            "example": "2025-03-19T12:34:56Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was last updated",
+            "example": "2025-03-19T12:34:56Z"
+          }
+        },
+        "description": "CocktailIngredient (Model) linking a cocktail to its ingredients"
+      },
+      "Ingredient": {
+        "type": "object",
+        "required": [
+          "name",
+          "isAlcoholic"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the ingredient",
+            "example": "Lime"
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the ingredient",
+            "example": "A sour fruit used in cocktails"
+          },
+          "isAlcoholic": {
+            "type": "boolean",
+            "description": "Whether the ingredient contains alcohol",
+            "example": false
+          },
+          "image": {
+            "type": "string",
+            "description": "URL to an image of the ingredient",
+            "example": "https://example.com/images/lime.jpg"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was created",
+            "example": "2025-03-19T12:34:56Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the cocktail was last updated",
+            "example": "2025-03-19T12:34:56Z"
+          }
+        },
+        "description": "Ingredient (Model)"
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root endpoint",
+        "description": "This endpoint serves as the root of the API.",
+        "parameters": [],
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved root information",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/docs": {
+      "get": {
+        "summary": "Get API Documentation",
+        "description": "Retrieve the Swagger API documentation for the available routes.",
+        "tags": [
+          "Documentation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved API documentation",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/cocktails": {
+      "get": {
+        "summary": "Get a list of cocktails",
+        "tags": ["Cocktails"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ingredient",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by ingredient ID"
+          },
+          {
+            "in": "query",
+            "name": "isAlcoholic",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter by alcoholic content"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": ["name", "category", "date"]
+            },
+            "description": "Sort results by specified field"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cocktails"
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "No cocktails found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new cocktail",
+        "tags": ["Cocktails"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "category", "instructions"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "instructions": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cocktail created"
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "500": {
+            "description": "Error creating cocktail"
+          }
+        }
+      }
+    },
+    
+    "/cocktails/{id}": {
+      "get": {
+        "summary": "Get a cocktail by ID",
+        "tags": ["Cocktails"],
+        "description": "Fetches a single cocktail by its unique ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the cocktail to retrieve.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved cocktail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Margarita"
+                    },
+                    "category": {
+                      "type": "string",
+                      "example": "Cocktail"
+                    },
+                    "instructions": {
+                      "type": "string",
+                      "example": "Mix ingredients and serve with a salted rim."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Cocktail not found"
+          },
+          "500": {
+            "description": "Error fetching cocktail"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a cocktail by ID",
+        "tags": ["Cocktails"],
+        "description": "Updates the details of an existing cocktail using the provided ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the cocktail to update.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "instructions": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "name": "Margarita",
+                  "category": "Cocktail",
+                  "instructions": "Shake and serve in a chilled glass."
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated cocktail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Margarita"
+                    },
+                    "category": {
+                      "type": "string",
+                      "example": "Cocktail"
+                    },
+                    "instructions": {
+                      "type": "string",
+                      "example": "Shake and serve in a chilled glass."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Cocktail not found"
+          },
+          "500": {
+            "description": "Error updating cocktail"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a cocktail by ID with all its cocktail ingredients",
+        "tags": ["Cocktails"],
+        "description": "Deletes a cocktail using its unique ID. All cocktail ingredients connected to this cocktail ID are also deleted.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the cocktail to delete.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted cocktail and associated ingredients"
+          },
+          "400": {
+            "description": "Invalid cocktail ID format"
+          },
+          "404": {
+            "description": "Cocktail not found"
+          },
+          "500": {
+            "description": "Internal server error while deleting cocktail"
+          }
+        },
+        "security": []
+      }
+    },
+    "/ingredients": {
+      "get": {
+        "summary": "Get a list of ingredients",
+        "tags": ["Ingredients"],
+        "responses": {
+          "200": {
+            "description": "List of ingredients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Ingredient"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching ingredients"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new ingredient",
+        "tags": ["Ingredients"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ingredient"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ingredient created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "500": {
+            "description": "Error creating ingredient"
+          }
+        }
+      }
+    },
+    "/ingredients/{id}": {
+      "get": {
+        "summary": "Get an ingredient by ID",
+        "tags": ["Ingredients"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the ingredient to retrieve.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved ingredient",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Ingredient not found"
+          },
+          "500": {
+            "description": "Error fetching ingredient"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an ingredient by ID",
+        "tags": ["Ingredients"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the ingredient to update.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ingredient"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated ingredient",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Ingredient not found"
+          },
+          "500": {
+            "description": "Error updating ingredient"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an ingredient by ID with all its associated cocktail ingredients",
+        "description": "Deletes an ingredient using its unique ID. All cocktail ingredients associated with this ingredient ID are also deleted.",
+        "tags": [ "Ingredients" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the ingredient to delete.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted ingredient and associated cocktail ingredients"
+          },
+          "400": {
+            "description": "Invalid ingredient ID format"
+          },
+          "404": {
+            "description": "Ingredient not found"
+          },
+          "500": {
+            "description": "Internal server error while deleting ingredient"
+          }
+        }
+      }
+    },
+    "/cocktail-ingredients": {
+      "get": {
+        "summary": "Get a list of cocktail ingredients with optional filters",
+        "description": "Fetches cocktail ingredients based on optional filters for cocktail ID or ingredient ID. If no filters are provided, all cocktail ingredients will be returned.",
+        "tags": ["CocktailIngredients"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cocktailId",
+            "description": "The ID of the cocktail to filter by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ingredientId",
+            "description": "The ID of the ingredient to filter by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cocktail ingredients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CocktailIngredient"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid cocktail ID format"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No cocktail ingredients found matching the filters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "No cocktail ingredients found matching the filters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error when fetching cocktail ingredients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error fetching cocktail ingredients"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Server error message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new cocktail ingredient",
+        "tags": ["CocktailIngredients"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocktailIngredient"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cocktail ingredient created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CocktailIngredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields"
+          },
+          "500": {
+            "description": "Error creating cocktail ingredient"
+          }
+        }
+      }
+    },
+    "/cocktail-ingredients/{id}": {
+      "get": {
+        "summary": "Get a cocktail ingredient by ID",
+        "tags": ["CocktailIngredients"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the cocktail ingredient",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved cocktail ingredient",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CocktailIngredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Cocktail ingredient not found"
+          },
+          "500": {
+            "description": "Error fetching cocktail ingredient"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a cocktail ingredient by ID",
+        "tags": ["CocktailIngredients"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the cocktail ingredient to update",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocktailIngredient"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated cocktail ingredient",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CocktailIngredient"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Cocktail ingredient not found"
+          },
+          "500": {
+            "description": "Error updating cocktail ingredient"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a cocktail ingredient by ID",
+        "tags": ["CocktailIngredients"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the cocktail ingredient to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted cocktail ingredient"
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "404": {
+            "description": "Cocktail, Ingredient or CocktailIngredient not found in database"
+          },
+          "500": {
+            "description": "Error deleting cocktail ingredient"
+          }
+        }
+      }
+    }
+  }
+}
